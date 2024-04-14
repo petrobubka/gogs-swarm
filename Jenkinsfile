@@ -1,6 +1,6 @@
 pipeline {
       agent {
-        swarm {
+        dockerContainer {
           image 'alpine:3.15'
         }
       }
