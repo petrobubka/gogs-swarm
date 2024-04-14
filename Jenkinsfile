@@ -1,7 +1,7 @@
 pipeline {
       agent {
         dockerContainer {
-          image 'alpine:3.15'
+          image 'benhall/dind-jenkins-agent:v2'
         }
       }
     
