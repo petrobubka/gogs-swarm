@@ -14,24 +14,12 @@ pipeline {
                 echo -e "https://alpine.global.ssl.fastly.net/alpine/v3.18/main" >> /etc/apk/repositories
                 apk update
                 apk add --no-cache binutils go postgresql-client git openssh
+                go build -o gogs -buildvcs=false
+                go test -v -cover ./...
                 '''
             }
         }
-        
-        stage('Build Gogs') {
-            agent {
-                docker {
-                    image 'golang:alpine'
-                    args '-u root'
-                }
-            }
-            steps {
-                sh 'go build -o gogs -buildvcs=false'
-                sh 'go test -v -cover ./...'
-
-            }
-        }
-        
+                
         
         stage('Kaniko Build & Push Image') {
             agent {
