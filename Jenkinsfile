@@ -7,7 +7,7 @@ pipeline {
     agent {
         docker {
             image 'gcr.io/kaniko-project/executor:debug'
-            args ''  // Remove entrypoint override if previously set
+            args '--entrypoint='''  // Remove entrypoint override if previously set
         }
     }
     steps {
