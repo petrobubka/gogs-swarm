@@ -10,11 +10,14 @@ pipeline {
                 }
             }
             steps {
+                withDockerRegistry(credentialsId: 'my-docker-credentials', url: 'https://index.docker.io/v1/') {
                 sh '''
                 /kaniko/executor --dockerfile `pwd`/Dockerfile_app \
                                  --context `pwd` \
                                  --destination=petrobubka/my_gogs_image:${BUILD_NUMBER}
                 '''
+                 }
+
             }
         }
         
