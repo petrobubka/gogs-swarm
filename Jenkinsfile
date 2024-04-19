@@ -17,7 +17,7 @@ pipeline {
                 withCredentials([string(credentialsId: 'docker-config-base64', variable: 'DOCKER_CONFIG_BASE64')]) {
                     sh '''
                     mkdir -p /kaniko/.docker
-                    echo $DOCKER_CONFIG_BASE64 | base64 -d > /kaniko/.docker/config.json
+                    echo $DOCKER_CONFIG_BASE64 > /kaniko/.docker/config.json
                     /kaniko/executor --dockerfile `pwd`/Dockerfile_app \
                                      --context `pwd` \
                                      --destination=petrobubka/my_gogs_image:latest \
