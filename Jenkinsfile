@@ -1,38 +1,11 @@
 pipeline {
-    agent any
-    environment {
-        DOCKER_IMAGE = "petrobubka/my_gogs_image:${BUILD_NUMBER}"
-        STACK_NAME = "myapp"
-    }
+    agent none // No global agent, define per stage
     stages {
-        stage('Build and Push Docker Image') {
+        stage('Build') {
+            agent { label 'my-docker-agent' } // This label matches the Docker template label
             steps {
-                script {
-                    // Build and push Docker image
-                    sh '''
-                    docker build -t ${DOCKER_IMAGE} .
-                    docker push ${DOCKER_IMAGE}
-                    '''
-                }
+                sh 'echo "Hello from Docker agent"'
             }
-        }
-
-        stage('Deploy with Docker Compose') {
-            steps {
-                script {
-                    // Update image in docker-compose.yml dynamically
-                    sh "sed -i 's|petrobubka/my_gogs_image:16|${DOCKER_IMAGE}|g' docker-compose.yml"
-
-                    // Deploy or update the stack
-                    sh "docker stack deploy -c docker-compose.yml ${STACK_NAME}"
-                }
-            }
-        }
-    }
-    post {
-        always {
-            // Perform any cleanup or final steps
-            echo "Build and deployment processes are completed."
         }
     }
 }
