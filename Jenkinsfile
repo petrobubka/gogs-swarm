@@ -1,15 +1,32 @@
 pipeline {
-    agent none // Use none because we will specify the environment for each stage
+    agent none // Use 'none' because we specify the environment for each stage
+
     stages {
-        
-        
-        stage('Deploy App to Docker Swarm') {
-            agent any // Run on any available agent
+
+        stage('Kaniko Build & Push Image') {
+            agent {
+                docker {
+                    image 'gcr.io/kaniko-project/executor:debug'
+                    args '--entrypoint=""'
+                }
+            }
+            environment {
+                DOCKER_CONFIG = '/kaniko/.docker/'
+            }
             steps {
-                script {
-                    sh 'docker ps'
+                withCredentials([string(credentialsId: 'docker-config-base64', variable: 'DOCKER_CONFIG_BASE64')]) {
+                    sh '''
+                    mkdir -p /kaniko/.docker
+                    echo $DOCKER_CONFIG_BASE64 | base64 -d > /kaniko/.docker/config.json
+                    /kaniko/executor --dockerfile `pwd`/Dockerfile_app \
+                                     --context `pwd` \
+                                     --destination=petrobubka/my_gogs_image:latest \
+                                     --cache=true
+                    '''
                 }
             }
         }
+
+
     }
 }
