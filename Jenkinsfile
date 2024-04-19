@@ -27,20 +27,11 @@ pipeline {
             }
             steps {
                 sh 'go build -o gogs -buildvcs=false'
+                sh 'go test -v -cover ./...'
+
             }
         }
         
-        stage('Test Gogs') {
-            agent {
-                docker {
-                    image 'golang:alpine'
-                    args '-u root'
-                }
-            }
-            steps {
-                sh 'go test -v -cover ./...'
-            }
-        }
         
         stage('Kaniko Build & Push Image') {
             agent {
