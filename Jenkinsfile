@@ -1,34 +1,39 @@
 pipeline {
-    agent {
-        docker {
-            image 'alpine:3.15'
-        }
-    }
+    agent none // Use 'none' because we specify the environment for each stage
+
     stages {
-        stage('Install dependencies') {
-            steps {
-                sh '''
-                echo -e "https://alpine.global.ssl.fastly.net/alpine/v3.18/community" > /etc/apk/repositories
-                echo -e "https://alpine.global.ssl.fastly.net/alpine/v3.18/main" >> /etc/apk/repositories
-                apk update
-                apk add --no-cache binutils go postgresql-client git openssh
-                '''
+        stage('Preparation') {
+            agent {
+                docker {
+                    image 'alpine:3.15'
+                }
+            }
+            stages {
+                stage('Install dependencies') {
+                    steps {
+                        sh '''
+                        echo -e "https://alpine.global.ssl.fastly.net/alpine/v3.18/community" > /etc/apk/repositories
+                        echo -e "https://alpine.global.ssl.fastly.net/alpine/v3.18/main" >> /etc/apk/repositories
+                        apk update
+                        apk add --no-cache binutils go postgresql-client git openssh
+                        '''
+                    }
+                }
+
+                stage('Build Gogs') {
+                    steps {
+                        sh 'go build -o gogs -buildvcs=false'
+                    }
+                }
+
+                stage('Test Gogs') {
+                    steps {
+                        sh 'go test -v -cover ./...'
+                    }
+                }
             }
         }
 
-        stage('Build Gogs') {
-            steps {
-                sh 'go build -o gogs -buildvcs=false'
-            }
-        }
-
-        stage('Test Gogs') {
-            steps {
-                sh 'go test -v -cover ./...'
-            }
-        }
-
-        // Override agent for specific stages if different environment is needed
         stage('Kaniko Build & Push Image') {
             agent {
                 docker {
@@ -60,6 +65,5 @@ pipeline {
                 }
             }
         }
-
     }
 }
