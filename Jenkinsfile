@@ -1,16 +1,13 @@
 pipeline {
-    agent any // Define no global agent; use specific agents per stage
+    agent any
+
     stages {
-        stage ('Build image'){
-            steps{
-                script{
-                    withDockerServer([uri:'tcp://192.168.100.30:2376']) {
-                        sh "docker ps"
-                    }
+        stage('Build Image') {
+            steps {
+                script {
+                    docker.build("my-app:${env.BUILD_ID}")
                 }
             }
         }
-
-
     }
 }
