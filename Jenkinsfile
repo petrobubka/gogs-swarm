@@ -2,44 +2,37 @@ pipeline {
     agent none // Use 'none' because we specify the environment for each stage
 
     stages {
-        stage('Install dependencies') {
+        stage('Preparation') {
             agent {
                 docker {
                     image 'alpine:3.15'
                 }
             }
-            steps {
-                sh '''
-                echo -e "https://alpine.global.ssl.fastly.net/alpine/v3.18/community" > /etc/apk/repositories
-                echo -e "https://alpine.global.ssl.fastly.net/alpine/v3.18/main" >> /etc/apk/repositories
-                apk update
-                apk add --no-cache binutils go postgresql-client git openssh
-                '''
-            }
-        }
+            stages {
+                stage('Install dependencies') {
+                    steps {
+                        sh '''
+                        echo -e "https://alpine.global.ssl.fastly.net/alpine/v3.18/community" > /etc/apk/repositories
+                        echo -e "https://alpine.global.ssl.fastly.net/alpine/v3.18/main" >> /etc/apk/repositories
+                        apk update
+                        apk add --no-cache binutils go postgresql-client git openssh
+                        '''
+                    }
+                }
 
-        stage('Build Gogs') {
-            agent {
-                docker {
-                    image 'alpine:3.15'
+                stage('Build Gogs') {
+                    steps {
+                        sh 'go build -o gogs -buildvcs=false'
+                    }
+                }
+
+                stage('Test Gogs') {
+                    steps {
+                        sh 'go test -v -cover ./...'
+                    }
                 }
             }
-            steps {
-                sh 'go build -o gogs -buildvcs=false'
-            }
         }
-
-        stage('Test Gogs') {
-            agent {
-                docker {
-                    image 'alpine:3.15'
-                }
-            }
-            steps {
-                sh 'go test -v -cover ./...'
-            }
-        }
-
 
         stage('Kaniko Build & Push Image') {
             agent {
@@ -64,14 +57,5 @@ pipeline {
                 }
             }
         }
-        stage('Deploy App to Docker Swarm') {
-            agent any
-            steps {
-                script {
-                    sh 'docker stack deploy -c docker-compose-gogs.yml gogs-stack'
-                }
-            }
-        }
-
     }
 }
