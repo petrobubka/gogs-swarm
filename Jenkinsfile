@@ -1,25 +1,7 @@
 pipeline {
     agent none // Use none because we will specify the environment for each stage
     stages {
-        stage('Install dependencies') {
-            agent {
-                docker {
-                    image 'alpine:3.15'
-                    args '-u root'
-                }
-            }
-            steps {
-                sh '''
-                echo -e "https://alpine.global.ssl.fastly.net/alpine/v3.18/community" > /etc/apk/repositories
-                echo -e "https://alpine.global.ssl.fastly.net/alpine/v3.18/main" >> /etc/apk/repositories
-                apk update
-                apk add --no-cache binutils go postgresql-client git openssh
-                go build -o gogs -buildvcs=false
-                go test -v -cover ./...
-                '''
-            }
-        }
-                
+    
         
         stage('Kaniko Build & Push Image') {
             agent {
