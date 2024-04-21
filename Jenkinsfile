@@ -1,4 +1,9 @@
 pipeline {
+    agent none // Use 'none' because we specify the environment for each stage
+
+    stages {
+        stage('Preparation') {
+            agent {
                 docker {
                     image 'alpine:3.15'
                 }
