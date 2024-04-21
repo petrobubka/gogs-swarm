@@ -51,7 +51,7 @@ pipeline {
                     echo $DOCKER_CONFIG_BASE64 > /kaniko/.docker/config.json
                     /kaniko/executor --dockerfile `pwd`/Dockerfile_app \
                                      --context `pwd` \
-                                     --destination=petrobubka/my_gogs_image_nomad:3 \
+                                     --destination=petrobubka/my_gogs_image_nomad:latest \
                                      --cache=true
                     '''
                 }
