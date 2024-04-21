@@ -52,13 +52,5 @@ pipeline {
                 }
             }
         }
-        stage('Deploy App to Docker Swarm') {
-            agent any
-            steps {
-                script {
-                    sh 'docker stack deploy -c docker-compose-gogs.yml gogs-stack'
-                }
-            }
-        }
     }
 }
